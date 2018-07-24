@@ -1,7 +1,7 @@
 package com.zylear.blokus.wsserver.manager.basehandler;
 
 
-import com.zylear.blokus.wsserver.bean.base.TransferBean;
+import com.zylear.blokus.wsserver.bean.transfer.base.TransferBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

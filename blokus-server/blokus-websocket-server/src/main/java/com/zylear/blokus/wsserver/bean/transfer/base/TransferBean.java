@@ -1,4 +1,4 @@
-package com.zylear.blokus.wsserver.bean.base;
+package com.zylear.blokus.wsserver.bean.transfer.base;
 
 import io.netty.channel.Channel;
 

@@ -1,7 +1,7 @@
 package com.zylear.blokus.wsserver.queue;
 
 
-import com.zylear.blokus.wsserver.bean.base.TransferBean;
+import com.zylear.blokus.wsserver.bean.transfer.base.TransferBean;
 
 /**
  * @author 28444

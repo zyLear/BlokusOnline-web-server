@@ -1,8 +1,8 @@
 package com.zylear.blokus.wsserver.handler;
 
 
-import com.zylear.blokus.wsserver.bean.base.MessageBean;
-import com.zylear.blokus.wsserver.bean.base.TransferBean;
+import com.zylear.blokus.wsserver.bean.transfer.base.MessageBean;
+import com.zylear.blokus.wsserver.bean.transfer.base.TransferBean;
 import com.zylear.blokus.wsserver.cache.ServerCache;
 import com.zylear.blokus.wsserver.queue.MessageQueue;
 import com.zylear.blokus.wsserver.util.JsonUtil;
@@ -34,15 +34,15 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ServerCache.removeChannel(ctx.channel());
-        ctx.channel().close();
+//        ServerCache.removeChannel(ctx.channel());
+//        ctx.channel().close();
         logger.info("the connect inactive close");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
-        ServerCache.removeChannel(ctx.channel());
-        ctx.channel().close();
+//        ServerCache.removeChannel(ctx.channel());
+//        ctx.channel().close();
         logger.info("the connect exception close");
     }
 

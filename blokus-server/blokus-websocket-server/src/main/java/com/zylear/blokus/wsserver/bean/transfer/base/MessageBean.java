@@ -1,4 +1,4 @@
-package com.zylear.blokus.wsserver.bean.base;
+package com.zylear.blokus.wsserver.bean.transfer.base;
 
 /**
  * Created by xiezongyu on 2018/7/17.
@@ -21,5 +21,13 @@ public class MessageBean {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageBean{" +
+                "msgType=" + msgType +
+                ", content='" + content + '\'' +
+                '}';
     }
 }
