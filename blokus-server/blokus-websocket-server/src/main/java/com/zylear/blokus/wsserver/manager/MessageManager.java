@@ -1,12 +1,14 @@
 package com.zylear.blokus.wsserver.manager;
 
 
-import com.zylear.blokus.wsserver.bean.RegisterMsg;
-import com.zylear.blokus.wsserver.bean.base.MessageBean;
-import com.zylear.blokus.wsserver.bean.base.TransferBean;
+import com.zylear.blokus.wsserver.bean.gameinfo.PlayerRoomInfo;
+import com.zylear.blokus.wsserver.bean.transfer.base.MessageBean;
+import com.zylear.blokus.wsserver.bean.transfer.base.TransferBean;
+import com.zylear.blokus.wsserver.cache.ServerCache;
 import com.zylear.blokus.wsserver.constant.MsgType;
 import com.zylear.blokus.wsserver.manager.basehandler.MessageHandler;
 import com.zylear.blokus.wsserver.util.JsonUtil;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,37 +30,37 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
         MessageBean messageBean = transferBean.getMessageBean();
         logger.info("handle msg :" + messageBean);
         switch (messageBean.getMsgType()) {
-            case MsgType.REGISTER:
-                register(transferBean, responses);
+            case MsgType.LOGIN:
+
                 break;
-            case MsgType.PING:
-                //do nothing
+            case MsgType.CHESS_DONE:
+                chessDone(transferBean, responses);
                 break;
             default:
                 break;
         }
     }
 
+    private synchronized void chessDone(TransferBean transferBean, List<TransferBean> responses) {
 
-    private void register(TransferBean transferBean, List<TransferBean> responses) {
-//        RegisterMsg registerMsg = JsonUtil.getObjectFromJson(transferBean.getMessageBean().getBody(), RegisterMsg.class);
-        MessageBean response = null;
-//        WechatRobotUser wechatRobotUser = wechatRobotUserService.findByWxWechatId(registerMsg.getWxId());
+        PlayerRoomInfo playerRoomInfo = ServerCache.getPlayerRoomInfo(transferBean.getChannel());
+        if (playerRoomInfo != null) {
+            playerRoomInfo.setStepsCount(playerRoomInfo.getStepsCount() + 1);
+            List<Channel> channels = ServerCache.getOtherPlayerChannelsInRoom(transferBean.getChannel());
+            for (Channel channel : channels) {
+                responses.add(new TransferBean(channel, transferBean.getMessageBean()));
+            }
+        }
 
-//        if (!wxpushSvcManager.validateWxId(registerMsg.getWxId()) || ServerCache.existClient(registerMsg.getWxId())) {
-//            response = MessageFormatter.formatMessage(MsgType.REGISTER_RESPONSE, RegisterRespMsg.ERROR_RESPONSE);
-//        } else {
-//            ServerCache.addChannel(registerMsg.getWxId(), transferBean.getChannel());
-//            response = MessageFormatter.formatMessage(MsgType.REGISTER_RESPONSE, RegisterRespMsg.SUCCESS_RESPONSE);
-//        }
-        responses.add(new TransferBean(transferBean.getChannel(), response));
+
+//        return null;
     }
 
     @Override
     public void send(List<TransferBean> transferBeans) {
         if (transferBeans != null) {
             for (TransferBean transferBean : transferBeans) {
-//                transferBean.getChannel().writeAndFlush(new TextWebSocketFrame(JsonUtil.format(transferBean.getMessageBean())));
+                transferBean.getChannel().writeAndFlush(new TextWebSocketFrame(JsonUtil.toJSONString(transferBean.getMessageBean())));
             }
         }
     }

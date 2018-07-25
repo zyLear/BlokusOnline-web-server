@@ -1,4 +1,4 @@
-package com.zylear.blokus.wsserver.bean;
+package com.zylear.blokus.wsserver.bean.transfer;
 
 /**
  * Created by xiezongyu on 2018/7/17.

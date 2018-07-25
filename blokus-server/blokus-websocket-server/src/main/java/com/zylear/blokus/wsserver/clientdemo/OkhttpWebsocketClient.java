@@ -1,6 +1,6 @@
 package com.zylear.blokus.wsserver.clientdemo;
 
-import com.zylear.blokus.wsserver.bean.base.MessageBean;
+import com.zylear.blokus.wsserver.bean.transfer.base.MessageBean;
 import com.zylear.blokus.wsserver.util.JsonUtil;
 import okhttp3.*;
 
