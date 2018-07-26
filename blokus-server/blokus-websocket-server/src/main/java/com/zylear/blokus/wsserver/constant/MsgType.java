@@ -51,6 +51,7 @@ public class MsgType {
 
     public static final int LOGOUT = 23;
 
+    public static final int CREATE_ROOM_RESPONSE = 24;
 
 
     public static final int PING = 10000;

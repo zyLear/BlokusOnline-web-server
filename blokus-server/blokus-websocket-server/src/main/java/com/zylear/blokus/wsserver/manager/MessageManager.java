@@ -2,10 +2,12 @@ package com.zylear.blokus.wsserver.manager;
 
 
 import com.zylear.blokus.wsserver.bean.gameinfo.PlayerRoomInfo;
+import com.zylear.blokus.wsserver.bean.transfer.RoomInfoMsg;
 import com.zylear.blokus.wsserver.bean.transfer.base.MessageBean;
 import com.zylear.blokus.wsserver.bean.transfer.base.TransferBean;
 import com.zylear.blokus.wsserver.cache.ServerCache;
 import com.zylear.blokus.wsserver.constant.MsgType;
+import com.zylear.blokus.wsserver.enums.GameType;
 import com.zylear.blokus.wsserver.manager.basehandler.MessageHandler;
 import com.zylear.blokus.wsserver.util.JsonUtil;
 import io.netty.channel.Channel;
@@ -36,6 +38,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             case MsgType.CHESS_DONE:
                 chessDone(transferBean, responses);
                 break;
+
             default:
                 break;
         }
@@ -55,6 +58,35 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
 
 //        return null;
     }
+
+    private synchronized void createRoom(TransferBean transferBean, List<TransferBean> responses) {
+        MessageBean message = transferBean.getMessageBean();
+        RoomInfoMsg roomInfoMsg = null;
+        try {
+            roomInfoMsg = JsonUtil.getObjectFromJson(message.getContent(), RoomInfoMsg.class);
+            logger.info("create room. roomName:{}", roomInfoMsg.getRoomName());
+            logger.info("create room. gameType:{}", GameType.valueOf(roomInfoMsg.getGameType()));
+        } catch (Exception e) {
+            logger.warn("parse BLOKUSCreateRoom exception. ", e);
+//            transferBean.setMessage(MessageBean.CREATE_ROOM_FAIL);
+            responses.add(transferBean);
+            return;
+        }
+
+        if (ServerCache.createRoom(transferBean.getChannel(), roomInfoMsg.getRoomName(),
+                GameType.valueOf(roomInfoMsg.getGameType()))) {
+
+            transferBean.setMessageBean(transferBean.getMessageBean());
+//            responses.add(transferBean);
+//            updateRoomPlayersInfoNotify(blokusCreateRoom.getRoomName(), responses);
+        } else {
+//            transferBean.setMessageBean(MessageBean.CREATE_ROOM_FAIL);
+//            responses.add(transferBean);
+        }
+//        ServerCache.showAllRooms();
+
+    }
+
 
     @Override
     public void send(List<TransferBean> transferBeans) {
