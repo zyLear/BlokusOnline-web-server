@@ -14,6 +14,7 @@ import com.zylear.blokus.wsserver.constant.MsgType;
 import com.zylear.blokus.wsserver.domain.GameAccount;
 import com.zylear.blokus.wsserver.domain.GameLog;
 import com.zylear.blokus.wsserver.domain.PlayerGameLog;
+import com.zylear.blokus.wsserver.domain.PlayerGameRecord;
 import com.zylear.blokus.wsserver.enums.*;
 import com.zylear.blokus.wsserver.manager.basehandler.MessageHandler;
 import com.zylear.blokus.wsserver.manager.callback.EmptyServerCacheCallback;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +84,6 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             case MsgType.CHESS_DONE:
                 chessDone(transferBean, responses);
                 break;
-
             case MsgType.GIVE_UP:
                 giveUp(transferBean, responses);
                 break;
@@ -95,6 +96,16 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             case MsgType.LOGOUT:
                 logout(transferBean, responses);
                 break;
+            case MsgType.ROOM_LIST:
+                roomList(transferBean, responses);
+                break;
+            case MsgType.REGISTER:
+                register(transferBean, responses);
+                break;
+
+            case MsgType.INIT_PLAYER_INFO_IN_GAME:
+                initPlayerInfoInGame(transferBean, responses);
+                break;
 
             case MsgType.QUIT:
                 quit(transferBean, responses);
@@ -102,6 +113,76 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             default:
                 break;
         }
+    }
+
+
+    private void initPlayerInfoInGame(TransferBean transferBean, List<TransferBean> responses) {
+        RoomInfo roomInfo = ServerCache.getRoomInfo(transferBean.getChannel());
+        if (roomInfo != null) {
+            Map<String, PlayerRoomInfo> playerRoomInfoMap = roomInfo.getPlayers();
+            MessageBean needSendMessage = MessageFormatter.formatPlayerInfoInGameMessage(playerRoomInfoMap);
+            transferBean.setMessageBean(needSendMessage);
+            responses.add(transferBean);
+        }
+    }
+
+    private void roomList(TransferBean transferBean, List<TransferBean> responses) {
+        Collection<RoomInfo> roomList = ServerCache.roomList();
+        MessageBean message = MessageFormatter.formatRoomListMessage(roomList);
+        responses.add(new TransferBean(transferBean.getChannel(), message));
+    }
+
+    @Transactional(value = DataSourceBlokusGameConfig.TX_MANAGER)
+    private synchronized void register(TransferBean transferBean, List<TransferBean> responses) {
+
+        MessageBean message = transferBean.getMessageBean();
+        UserMsg userMsg;
+        try {
+            userMsg = JsonUtil.getObjectFromJson(message.getContent(), UserMsg.class);
+            logger.info("register. account:{}", userMsg.getAccount());
+            logger.info("register. roomName:{}", userMsg.getPassword());
+        } catch (Exception e) {
+            logger.warn("parse UserMsg exception. ", e);
+            responses.add(new TransferBean(transferBean.getChannel(), MessageBean.REGISTER_FAIL));
+            return;
+        }
+        String account = userMsg.getAccount();
+        String password = userMsg.getPassword();
+
+        try {
+            GameAccount gameAccount = gameAccountService.findByAccount(account);
+            if (gameAccount == null) {
+                Date date = new Date();
+                gameAccount = new GameAccount();
+                gameAccount.setAccount(account);
+                gameAccount.setPassword(password);
+                gameAccount.setStars(0);
+                gameAccount.setCreateTime(date);
+                gameAccount.setLastUpdateTime(date);
+                gameAccountService.insert(gameAccount);
+
+                PlayerGameRecord gameRecord = new PlayerGameRecord();
+                gameRecord.setAccount(account);
+                gameRecord.setGameType(GameType.blokus_four.getValue());
+                gameRecord.setWinCount(0);
+                gameRecord.setLoseCount(0);
+                gameRecord.setEscapeCount(0);
+                gameRecord.setRankScore(1200);
+                gameRecord.setRank(0);
+                gameRecord.setCreateTime(date);
+                gameRecord.setLastUpdateTime(date);
+                playerGameRecordService.insert(gameRecord);
+                gameRecord.setGameType(GameType.blokus_two.getValue());
+                playerGameRecordService.insert(gameRecord);
+
+                responses.add(new TransferBean(transferBean.getChannel(), MessageBean.REGISTER_SUCCESS));
+            }
+        } catch (Exception e) {
+            responses.add(new TransferBean(transferBean.getChannel(), MessageBean.REGISTER_FAIL));
+            logger.info("register fail. ", e);
+        }
+
+
     }
 
     private void logout(TransferBean transferBean, List<TransferBean> responses) {

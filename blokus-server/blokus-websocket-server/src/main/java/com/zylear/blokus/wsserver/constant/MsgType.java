@@ -59,6 +59,8 @@ public class MsgType {
 
     public static final Integer LEAVE_ROOM_RESPONSE = 27;
 
+    public static final int REGISTER_RESPONSE = 28;
+
 
     public static final int PING = 10000;
 

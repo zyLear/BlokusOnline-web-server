@@ -23,6 +23,11 @@ public class MessageBean {
 
     public static final MessageBean START_BLOKUS_TWO_PEOPLE = new MessageBean(MsgType.START_BLOKUS_TWO_PEOPLE, "");
 
+    public static final MessageBean REGISTER_SUCCESS = new MessageBean(MsgType.REGISTER_RESPONSE, JsonUtil.toJSONString(ResponseMsg.SUCCESS));
+
+    public static final MessageBean REGISTER_FAIL = new MessageBean(MsgType.REGISTER_RESPONSE, JsonUtil.toJSONString(ResponseMsg.FAIL));
+
+
     private Integer msgType;
     private String content;
 
