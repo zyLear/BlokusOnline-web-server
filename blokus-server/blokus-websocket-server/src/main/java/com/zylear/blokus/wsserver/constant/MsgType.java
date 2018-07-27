@@ -55,9 +55,9 @@ public class MsgType {
 
     public static final int LOGIN_RESPONSE = 25;
 
-    public static final Integer JOIN_ROOM_RESPONSE = 26;
+    public static final int JOIN_ROOM_RESPONSE = 26;
 
-    public static final Integer LEAVE_ROOM_RESPONSE = 27;
+    public static final int LEAVE_ROOM_RESPONSE = 27;
 
     public static final int REGISTER_RESPONSE = 28;
 
