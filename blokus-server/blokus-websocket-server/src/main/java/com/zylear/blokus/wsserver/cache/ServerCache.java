@@ -3,10 +3,7 @@ package com.zylear.blokus.wsserver.cache;
 import com.zylear.blokus.wsserver.bean.gameinfo.PlayerInfo;
 import com.zylear.blokus.wsserver.bean.gameinfo.PlayerRoomInfo;
 import com.zylear.blokus.wsserver.bean.gameinfo.RoomInfo;
-import com.zylear.blokus.wsserver.enums.BlokusColor;
-import com.zylear.blokus.wsserver.enums.GameStatus;
-import com.zylear.blokus.wsserver.enums.GameType;
-import com.zylear.blokus.wsserver.enums.RoomStatus;
+import com.zylear.blokus.wsserver.enums.*;
 import com.zylear.blokus.wsserver.manager.callback.EmptyServerCacheCallback;
 import com.zylear.blokus.wsserver.manager.callback.ServerCacheCallback;
 import io.netty.channel.Channel;
@@ -85,9 +82,33 @@ public class ServerCache {
         return false;
     }
 
-    public static void quit(Channel channel) {
-
-
+    public static void quit(Channel channel, ServerCacheCallback serverCacheCallback) {
+        PlayerInfo playerInfo = playerMap.get(channel);
+        if (playerInfo != null) {
+            RoomInfo roomInfo = playerInfo.getRoomInfo();
+            if (roomInfo != null) {
+                PlayerRoomInfo playerRoomInfo = roomInfo.getPlayers().get(playerInfo.getAccount());
+                int playerCount = roomInfo.getPlayerCount();
+                if (playerCount <= 1) {
+                    if (RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
+                            GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
+                        serverCacheCallback.gameStatusChange(playerRoomInfo, roomInfo, GameResult.win);
+                    }
+                    roomMap.remove(roomInfo.getRoomName());
+                } else {
+                    roomInfo.setPlayerCount(playerCount - 1);
+                    roomInfo.getPlayers().remove(playerInfo.getAccount());
+                    if (RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
+                            GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
+                        serverCacheCallback.giveUp(playerRoomInfo, roomInfo);
+                        serverCacheCallback.gameStatusChange(playerRoomInfo, roomInfo, GameResult.escape);
+                    } else if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
+                        serverCacheCallback.updateRoomPlayersInfo(roomInfo.getRoomName());
+                    }
+                }
+            }
+            playerMap.remove(channel);
+        }
     }
 
     public static PlayerInfo getPlayerInfo(Channel channel) {
@@ -213,7 +234,6 @@ public class ServerCache {
         }
 
     }
-
 
     public static Collection<RoomInfo> roomList() {
         return roomMap.values();

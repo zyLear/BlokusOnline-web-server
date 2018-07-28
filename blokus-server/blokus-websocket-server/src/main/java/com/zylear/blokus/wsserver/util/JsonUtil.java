@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.JSONLibDataFormatSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.zylear.blokus.wsserver.bean.gameinfo.RoomInfo;
+import com.zylear.blokus.wsserver.bean.transfer.RoomInfoMsg;
 
 //import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import java.util.List;
@@ -107,6 +109,9 @@ public class JsonUtil {
         return s;
     }
 
-
+    public static void main(String[] args) {
+        RoomInfoMsg roomInfoMsg = JsonUtil.getObjectFromJson("{\"roomName\":\"sdfsdf\"}", RoomInfoMsg.class);
+        System.out.println(roomInfoMsg.getRoomName()+" "+roomInfoMsg.getGameType());
+    }
 
 }

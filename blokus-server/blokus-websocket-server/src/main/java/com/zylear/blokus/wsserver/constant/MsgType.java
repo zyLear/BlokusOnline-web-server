@@ -53,9 +53,18 @@ public class MsgType {
 
     public static final int CREATE_ROOM_RESPONSE = 24;
 
+    public static final int LOGIN_RESPONSE = 25;
+
+    public static final int JOIN_ROOM_RESPONSE = 26;
+
+    public static final int LEAVE_ROOM_RESPONSE = 27;
+
+    public static final int REGISTER_RESPONSE = 28;
+
 
     public static final int PING = 10000;
 
     public static final int QUIT = 10001;
+
 
 }
