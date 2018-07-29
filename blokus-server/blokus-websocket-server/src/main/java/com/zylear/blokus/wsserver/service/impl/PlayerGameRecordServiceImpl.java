@@ -1,7 +1,7 @@
 package com.zylear.blokus.wsserver.service.impl;
 
 
-import com.zylear.blokus.wsserver.blokusgame.PlayerGameRecordMapper;
+import com.zylear.blokus.wsserver.dao.mybatis.blokusgame.PlayerGameRecordMapper;
 import com.zylear.blokus.wsserver.domain.PlayerGameRecord;
 import com.zylear.blokus.wsserver.service.PlayerGameRecordService;
 import org.springframework.beans.factory.annotation.Autowired;

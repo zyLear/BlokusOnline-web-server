@@ -24,7 +24,6 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
     private static final Logger logger = LoggerFactory.getLogger(TextWebSocketFrameHandler.class);
 
 
-
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
 
@@ -34,16 +33,20 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-//        ServerCache.removeChannel(ctx.channel());
-//        ctx.channel().close();
-        logger.info("the connect inactive close");
+        Channel channel = ctx.channel();
+        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), MessageBean.QUIT));
+        logger.info("client:{} channelInactive. ", channel.remoteAddress());
+        ctx.close();
+        //  channelInactive  ->  handlerRemoved
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
-//        ServerCache.removeChannel(ctx.channel());
-//        ctx.channel().close();
-        logger.info("the connect exception close");
+        Channel channel = ctx.channel();
+        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), MessageBean.QUIT));
+        logger.info("client:{} exceptionCaught. ", channel.remoteAddress(), e);
+        // 当出现异常就关闭连接
+        ctx.close();
     }
 
 

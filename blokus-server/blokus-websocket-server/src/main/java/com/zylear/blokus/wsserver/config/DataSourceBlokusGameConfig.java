@@ -19,9 +19,9 @@ import java.util.List;
  * @author 28444
  * @date 2018/1/10.
  */
-//@Configuration
-//@MapperScan(basePackages = DataSourceBlokusGameConfig.SCAN_PACKAGE)
-//@EnableTransactionManagement
+@Configuration
+@MapperScan(basePackages = DataSourceBlokusGameConfig.SCAN_PACKAGE)
+@EnableTransactionManagement
 public class DataSourceBlokusGameConfig {
 
     public final static String DATA_SOURCE = "dataSourceBlokusGame";

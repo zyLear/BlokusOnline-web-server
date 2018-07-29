@@ -20,7 +20,7 @@ public class RoomListMsg {
     public static class RoomItemMsg {
         private String roomName;
         private Integer maxPlayerCount;
-        private Integer RoomStatus;
+        private String RoomStatus;
         private Integer currentPlayerCount;
 
         public String getRoomName() {
@@ -39,11 +39,11 @@ public class RoomListMsg {
             this.maxPlayerCount = maxPlayerCount;
         }
 
-        public Integer getRoomStatus() {
+        public String getRoomStatus() {
             return RoomStatus;
         }
 
-        public void setRoomStatus(Integer roomStatus) {
+        public void setRoomStatus(String roomStatus) {
             RoomStatus = roomStatus;
         }
 
