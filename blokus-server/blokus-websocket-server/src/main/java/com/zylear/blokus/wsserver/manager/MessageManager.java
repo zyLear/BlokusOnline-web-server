@@ -30,13 +30,11 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -61,7 +59,8 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     @Override
     public void handle(TransferBean transferBean, List<TransferBean> responses) {
         MessageBean messageBean = transferBean.getMessageBean();
-        logger.info("handle msg :" + messageBean);
+        if (messageBean.getMsgType() != MsgType.PING && messageBean.getMsgType() != MsgType.ROOM_LIST)
+            logger.info("handle msg :" + messageBean);
         switch (messageBean.getMsgType()) {
             case MsgType.LOGIN:
                 login(transferBean, responses);
@@ -107,6 +106,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 initPlayerInfoInGame(transferBean, responses);
                 break;
 
+
             case MsgType.QUIT:
                 quit(transferBean, responses);
                 break;
@@ -129,7 +129,17 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     private void roomList(TransferBean transferBean, List<TransferBean> responses) {
         Collection<RoomInfo> roomList = ServerCache.roomList();
         MessageBean message = MessageFormatter.formatRoomListMessage(roomList);
+
         responses.add(new TransferBean(transferBean.getChannel(), message));
+    }
+
+    private void notifyRoomList(TransferBean transferBean, List<TransferBean> responses) {
+        Collection<RoomInfo> roomList = ServerCache.roomList();
+        MessageBean message = MessageFormatter.formatRoomListMessage(roomList);
+        Set<Channel> players = ServerCache.players();
+        for (Channel channel : players) {
+            responses.add(new TransferBean(channel, message));
+        }
     }
 
     @Transactional(value = DataSourceBlokusGameConfig.TX_MANAGER)
@@ -219,6 +229,9 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
             logger.info("{} lose", playerRoomInfo.getAccount());
             gameStatusChange(playerRoomInfo, roomInfo, GameResult.lose);
+            if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
+                notifyRoomList(transferBean, responses);
+            }
         }
     }
 
@@ -273,7 +286,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     }
 
 
-    private synchronized void quit(TransferBean transferBean, final List<TransferBean> responses) {
+    private synchronized void quit(final TransferBean transferBean, final List<TransferBean> responses) {
         ServerCache.quit(transferBean.getChannel(), new EmptyServerCacheCallback() {
             @Override
             public void gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult) {
@@ -294,7 +307,14 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                     }
                 }
             }
+
+            @Override
+            public void notifyRoomList() {
+                MessageManager.this.notifyRoomList(transferBean, responses);
+            }
         });
+
+
     }
 
 
@@ -339,6 +359,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             transferBean.setMessageBean(MessageBean.LEAVE_ROOM_SUCCESS);
             responses.add(transferBean);
             updateRoomPlayersInfoNotify(roomName, responses);
+            notifyRoomList(transferBean, responses);
         } else {
             transferBean.setMessageBean(MessageBean.LEAVE_ROOM_FAIL);
             responses.add(transferBean);
@@ -368,7 +389,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
 
     }
 
-    private synchronized void ready(TransferBean transferBean, final List<TransferBean> responses) {
+    private synchronized void ready(final TransferBean transferBean, final List<TransferBean> responses) {
         ServerCache.ready(transferBean.getChannel(), new EmptyServerCacheCallback() {
             @Override
             public void startGame(RoomInfo roomInfo) {
@@ -383,6 +404,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                     gameLogService.insert(gameLog);
                     roomInfo.setGameLogId(gameLog.getId());
                     startGameNotify(roomInfo.getRoomName(), responses);
+                    MessageManager.this.notifyRoomList(transferBean, responses);
                 }
             }
 
@@ -394,13 +416,12 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     }
 
     private void startGameNotify(String roomName, List<TransferBean> responses) {
-        Map<String, PlayerRoomInfo> playerRoomInfoMap = ServerCache.getPlayerRoomInfos(roomName);
-
-        MessageBean message;
-        message = MessageBean.START_BLOKUS;
-
+        RoomInfo roomInfo = ServerCache.getRoomInfo(roomName);
+        Map<String, PlayerRoomInfo> playerRoomInfoMap = roomInfo.getPlayers();
         for (Entry<String, PlayerRoomInfo> entry : playerRoomInfoMap.entrySet()) {
-            responses.add(new TransferBean(entry.getValue().getChannel(), message));
+            PlayerRoomInfo value = entry.getValue();
+            MessageBean message = MessageFormatter.formatStartMsg(MsgType.START_BLOKUS, value.getColor(), roomInfo.getGameType());
+            responses.add(new TransferBean(value.getChannel(), message));
         }
     }
 
@@ -439,7 +460,8 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             MessageBean messageBean = MessageFormatter.formatRoomInfoWithSuccessRespnoseMsg(MsgType.CREATE_ROOM_RESPONSE, roomInfoMsg);
             transferBean.setMessageBean(messageBean);
             responses.add(transferBean);
-//            updateRoomPlayersInfoNotify(blokusCreateRoom.getRoomName(), responses);
+            updateRoomPlayersInfoNotify(roomInfoMsg.getRoomName(), responses);
+            notifyRoomList(transferBean, responses);
         } else {
             transferBean.setMessageBean(MessageBean.CREATE_ROOM_FAIL);
             responses.add(transferBean);
@@ -468,9 +490,11 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 MessageBean messageBean = MessageFormatter.formatRoomInfoWithSuccessRespnoseMsg(MsgType.JOIN_ROOM_RESPONSE, roomInfoMsg);
                 responses.add(new TransferBean(transferBean.getChannel(), messageBean));
                 updateRoomPlayersInfoNotify(roomInfoMsg.getRoomName(), responses);
+                notifyRoomList(transferBean, responses);
+            } else {
+                transferBean.setMessageBean(MessageBean.JOIN_ROOM_FAIL);
+                responses.add(transferBean);
             }
-            transferBean.setMessageBean(MessageBean.JOIN_ROOM_FAIL);
-            responses.add(transferBean);
         }
     }
 
@@ -493,19 +517,22 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
         }
     }
 
-
+    @Autowired
     public void setGameAccountService(GameAccountService gameAccountService) {
         this.gameAccountService = gameAccountService;
     }
 
+    @Autowired
     public void setGameLogService(GameLogService gameLogService) {
         this.gameLogService = gameLogService;
     }
 
+    @Autowired
     public void setPlayerGameLogService(PlayerGameLogService playerGameLogService) {
         this.playerGameLogService = playerGameLogService;
     }
 
+    @Autowired
     public void setPlayerGameRecordService(PlayerGameRecordService playerGameRecordService) {
         this.playerGameRecordService = playerGameRecordService;
     }

@@ -31,5 +31,10 @@ public class EmptyServerCacheCallback implements ServerCacheCallback {
 
     }
 
+    @Override
+    public void notifyRoomList() {
+
+    }
+
 
 }

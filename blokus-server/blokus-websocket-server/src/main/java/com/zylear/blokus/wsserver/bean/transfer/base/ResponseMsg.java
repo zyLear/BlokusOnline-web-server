@@ -9,7 +9,7 @@ public class ResponseMsg {
 
     public static final ResponseMsg SUCCESS = new ResponseMsg(0, "success");
 
-    public static final ResponseMsg FAIL = new ResponseMsg(0, "fail");
+    public static final ResponseMsg FAIL = new ResponseMsg(1, "fail");
 
 
     public ResponseMsg(ResponseMsg responseMsg) {

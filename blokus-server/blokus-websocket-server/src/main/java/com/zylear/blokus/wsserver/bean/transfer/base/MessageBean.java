@@ -27,6 +27,8 @@ public class MessageBean {
 
     public static final MessageBean REGISTER_FAIL = new MessageBean(MsgType.REGISTER_RESPONSE, JsonUtil.toJSONString(ResponseMsg.FAIL));
 
+    public static final MessageBean QUIT = new MessageBean(MsgType.QUIT, "");
+
 
     private Integer msgType;
     private String content;

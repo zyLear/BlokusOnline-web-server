@@ -1,4 +1,4 @@
-package com.zylear.blokus.wsserver.blokusgame;
+package com.zylear.blokus.wsserver.dao.mybatis.blokusgame;
 
 
 import com.zylear.blokus.wsserver.domain.GameLog;

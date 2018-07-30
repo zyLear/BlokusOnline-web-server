@@ -49,6 +49,8 @@ public class ServerCache {
                     roomInfo.setMaxPlayerCount(2);
                 } else if (GameType.blokus_four.equals(gameType)) {
                     roomInfo.setMaxPlayerCount(4);
+                } else {
+                    return false;
                 }
                 roomInfo.setRoomStatus(RoomStatus.waiting);
 
@@ -106,6 +108,7 @@ public class ServerCache {
                         serverCacheCallback.updateRoomPlayersInfo(roomInfo.getRoomName());
                     }
                 }
+                serverCacheCallback.notifyRoomList();
             }
             playerMap.remove(channel);
         }
@@ -237,6 +240,10 @@ public class ServerCache {
 
     public static Collection<RoomInfo> roomList() {
         return roomMap.values();
+    }
+
+    public static Set<Channel> players() {
+        return playerMap.keySet();
     }
 
 

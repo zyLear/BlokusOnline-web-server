@@ -17,4 +17,6 @@ public interface ServerCacheCallback {
     void gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult);
 
     void giveUp(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo);
+
+    void notifyRoomList();
 }
