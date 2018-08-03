@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+one
+<script>
+    var a = new Object();
+    a.f1 = function () {
+        alert('aaa');
+    };
+    a.name = 'namee';
+//    for(var i in a) {
+//        alert(i);
+//    }
+//    alert(a['name']);
+//    alert(a.f1);
+
+    var tt = 'alert(a["f1"]);';
+//    var tt = 'a.f1();';
+    eval(tt);
+</script>
+
+</body>
+</html>
