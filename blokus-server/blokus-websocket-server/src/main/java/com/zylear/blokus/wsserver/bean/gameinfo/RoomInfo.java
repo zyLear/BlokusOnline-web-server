@@ -149,4 +149,21 @@ public class RoomInfo {
         }
         roomStatus = RoomStatus.waiting;
     }
+
+    public PlayerRoomInfo canWin() {
+        int loseCount = 0;
+        PlayerRoomInfo playerRoomInfo = null;
+        for (Entry<String, PlayerRoomInfo> entry : players.entrySet()) {
+            if (GameStatus.lose.equals(entry.getValue().getGameStatus())) {
+                loseCount++;
+            } else if (GameStatus.gaming.equals(entry.getValue().getGameStatus())) {
+                playerRoomInfo = entry.getValue();
+            }
+        }
+
+        if (loseCount == maxPlayerCount - 1 ) {
+            return playerRoomInfo;
+        }
+        return null;
+    }
 }

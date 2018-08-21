@@ -229,6 +229,13 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
             logger.info("{} lose", playerRoomInfo.getAccount());
             gameStatusChange(playerRoomInfo, roomInfo, GameResult.lose);
+
+            PlayerRoomInfo winPlayer = roomInfo.canWin();
+            if (winPlayer != null) {
+                logger.info("{} win", winPlayer.getAccount());
+                gameStatusChange(winPlayer, roomInfo, GameResult.win);
+            }
+
             if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
                 notifyRoomList(transferBean, responses);
             }
