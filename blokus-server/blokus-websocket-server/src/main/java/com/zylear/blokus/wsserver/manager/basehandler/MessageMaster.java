@@ -55,6 +55,8 @@ public class MessageMaster {
                     } catch (InterruptedException e) {
                     }
                 }
+            }else {
+                //wait until work thread decrement reentryLock
             }
         }
     }

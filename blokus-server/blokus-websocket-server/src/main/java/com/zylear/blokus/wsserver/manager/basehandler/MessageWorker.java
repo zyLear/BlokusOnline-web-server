@@ -40,6 +40,8 @@ public class MessageWorker implements Runnable {
         } finally {
             int count = MessageMaster.currentRunningCount.decrementAndGet();
             logger.info("handle msg end. current:{}", count);
+
+            //reentryLock notify
         }
 
     }
