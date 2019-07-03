@@ -72,9 +72,12 @@ public class CountableThreadPool {
 
     public void waitConsume() {
         try {
+            threadPoolReentrantLock.lock();
             threadPoolReentrantLockCondition.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }finally {
+
         }
     }
 

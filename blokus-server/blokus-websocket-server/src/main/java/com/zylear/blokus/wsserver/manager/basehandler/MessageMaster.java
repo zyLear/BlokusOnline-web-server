@@ -30,7 +30,7 @@ public class MessageMaster {
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private ExecutorService executorServices = Executors.newFixedThreadPool(maxThreadCount);
 
-    private CountableThreadPool countableThreadPool = new CountableThreadPool(maxThreadCount, executorServices);
+//    private CountableThreadPool countableThreadPool = new CountableThreadPool(maxThreadCount, executorServices);
 
 
     private ReentrantLock newCommandLock = new ReentrantLock();
@@ -87,8 +87,8 @@ public class MessageMaster {
                 } else {
 //                    int count = currentRunningCount.incrementAndGet();
 //                    logger.info("begin handle msg. current:{}", count);
-                    countableThreadPool.submit(new MessageWorker(messageManager, transferBean));
-//                    executorServices.submit(new MessageWorker(messageManager, transferBean));
+//                    countableThreadPool.submit(new MessageWorker(messageManager, transferBean));
+                    executorServices.submit(new MessageWorker(messageManager, transferBean));
                 }
 
 
@@ -127,7 +127,7 @@ public class MessageMaster {
     }
 
 
-    private void waitCommand() {
+    private void waitCommandTest() {
         newCommandLock.lock();
         try {
             System.out.println("wait start");
@@ -142,7 +142,7 @@ public class MessageMaster {
         }
     }
 
-    private void waitCommandTest() {
+    private void waitCommand() {
         newCommandLock.lock();
         try {
             newCommandLockCondition.await();
