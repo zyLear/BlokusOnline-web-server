@@ -49,6 +49,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     private GameLogService gameLogService;
     private PlayerGameLogService playerGameLogService;
     private PlayerGameRecordService playerGameRecordService;
+    private MessageManager self;
 
     private static final Integer WIN_CHANGE_SCORE_TEMPLATE = 23;
     private static final Integer LOSE_CHANGE_SCORE_TEMPLATE = -21;
@@ -99,7 +100,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 roomList(transferBean, responses);
                 break;
             case MsgType.REGISTER:
-                register(transferBean, responses);
+                self.register(transferBean, responses);
                 break;
 
             case MsgType.INIT_PLAYER_INFO_IN_GAME:
@@ -217,7 +218,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
                 !GameStatus.win.equals(playerRoomInfo.getGameStatus())) {
             logger.info("{} win", playerRoomInfo.getAccount());
-            gameStatusChange(playerRoomInfo, roomInfo, GameResult.win);
+            self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.win);
         }
     }
 
@@ -228,12 +229,12 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
                 GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
             logger.info("{} lose", playerRoomInfo.getAccount());
-            gameStatusChange(playerRoomInfo, roomInfo, GameResult.lose);
+            self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.lose);
 
             PlayerRoomInfo winPlayer = roomInfo.canWin();
             if (winPlayer != null) {
                 logger.info("{} win", winPlayer.getAccount());
-                gameStatusChange(winPlayer, roomInfo, GameResult.win);
+                self.gameStatusChange(winPlayer, roomInfo, GameResult.win);
             }
 
             if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
@@ -297,7 +298,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
         ServerCache.quit(transferBean.getChannel(), new EmptyServerCacheCallback() {
             @Override
             public void gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult) {
-                MessageManager.this.gameStatusChange(playerRoomInfo, roomInfo, gameResult);
+                self.gameStatusChange(playerRoomInfo, roomInfo, gameResult);
             }
 
             @Override
@@ -542,5 +543,10 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     @Autowired
     public void setPlayerGameRecordService(PlayerGameRecordService playerGameRecordService) {
         this.playerGameRecordService = playerGameRecordService;
+    }
+
+    @Autowired
+    public void setSelf(MessageManager self) {
+        this.self = self;
     }
 }
