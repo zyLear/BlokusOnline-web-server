@@ -43,6 +43,10 @@ public class BaseMessageQueue<T> {
         }
     }
 
+    public T poll() {
+        return queue.poll();
+    }
+
     public int getQueueSize() {
         return queue.size();
     }

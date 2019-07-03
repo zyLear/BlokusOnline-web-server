@@ -2,6 +2,7 @@ package com.zylear.blokus.wsserver.server;
 
 import com.zylear.blokus.wsserver.handler.HttpRequestHandler;
 import com.zylear.blokus.wsserver.handler.TextWebSocketFrameHandler;
+import com.zylear.blokus.wsserver.manager.basehandler.MessageMaster;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class BlokusServerChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-
+    private MessageMaster messageMaster;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -37,7 +38,12 @@ public class BlokusServerChannelInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast(new WebSocketServerProtocolHandler("/blokus"));
 //        pipeline.addLast(msgCheckHandler);
 
-        pipeline.addLast(new TextWebSocketFrameHandler());
+        pipeline.addLast(new TextWebSocketFrameHandler(messageMaster));
 
+    }
+
+    @Autowired
+    public void setMessageMaster(MessageMaster messageMaster) {
+        this.messageMaster = messageMaster;
     }
 }

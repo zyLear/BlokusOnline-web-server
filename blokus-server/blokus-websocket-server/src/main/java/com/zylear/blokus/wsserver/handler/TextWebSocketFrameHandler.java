@@ -4,6 +4,7 @@ package com.zylear.blokus.wsserver.handler;
 import com.zylear.blokus.wsserver.bean.transfer.base.MessageBean;
 import com.zylear.blokus.wsserver.bean.transfer.base.TransferBean;
 import com.zylear.blokus.wsserver.cache.ServerCache;
+import com.zylear.blokus.wsserver.manager.basehandler.MessageMaster;
 import com.zylear.blokus.wsserver.queue.MessageQueue;
 import com.zylear.blokus.wsserver.util.JsonUtil;
 import io.netty.channel.Channel;
@@ -23,18 +24,25 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     private static final Logger logger = LoggerFactory.getLogger(TextWebSocketFrameHandler.class);
 
+    private MessageMaster messageMaster;
+
+    public TextWebSocketFrameHandler(MessageMaster messageMaster) {
+        this.messageMaster = messageMaster;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
 
         MessageBean messageBean = JsonUtil.getObjectFromJson(msg.text(), MessageBean.class);
-        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), messageBean));
+        messageMaster.addCommand(new TransferBean(ctx.channel(), messageBean));
+//        MessageQueue.getInstance().put();
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), MessageBean.QUIT));
+        messageMaster.addCommand(new TransferBean(ctx.channel(), MessageBean.QUIT));
+//        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), MessageBean.QUIT));
         logger.info("client:{} channelInactive. ", channel.remoteAddress());
         ctx.close();
         //  channelInactive  ->  handlerRemoved
@@ -43,7 +51,8 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         Channel channel = ctx.channel();
-        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), MessageBean.QUIT));
+        messageMaster.addCommand(new TransferBean(ctx.channel(), MessageBean.QUIT));
+//        MessageQueue.getInstance().put(new TransferBean(ctx.channel(), MessageBean.QUIT));
         logger.info("client:{} exceptionCaught. ", channel.remoteAddress(), e);
         // 当出现异常就关闭连接
         ctx.close();

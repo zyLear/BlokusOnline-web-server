@@ -38,8 +38,8 @@ public class MessageWorker implements Runnable {
         } catch (Exception e) {
             logger.info("handle msg exception", e);
         } finally {
-            int count = MessageMaster.currentRunningCount.decrementAndGet();
-            logger.info("handle msg end. current:{}", count);
+//            int count = MessageMaster.currentRunningCount.decrementAndGet();
+//            logger.info("handle msg end. current:{}", count);
 
             //reentryLock notify
         }
