@@ -144,7 +144,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     }
 
     @Transactional(value = DataSourceBlokusGameConfig.TX_MANAGER)
-    private synchronized void register(TransferBean transferBean, List<TransferBean> responses) {
+    public synchronized void register(TransferBean transferBean, List<TransferBean> responses) {
 
         MessageBean message = transferBean.getMessageBean();
         UserMsg userMsg;
@@ -245,7 +245,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
 
 
     @Transactional(value = DataSourceBlokusGameConfig.TX_MANAGER)
-    private void gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult) {
+    public void gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult) {
 
         Integer changeScore;
         switch (gameResult) {
