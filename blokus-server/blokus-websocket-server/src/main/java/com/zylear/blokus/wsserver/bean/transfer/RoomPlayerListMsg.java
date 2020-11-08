@@ -19,8 +19,8 @@ public class RoomPlayerListMsg {
 
     public static class RoomPlayerInfoMsg{
         private String account;
-        private String color;
-        private String isReady;
+        private Integer color;
+        private Boolean isReady;
 
         public String getAccount() {
             return account;
@@ -30,19 +30,19 @@ public class RoomPlayerListMsg {
             this.account = account;
         }
 
-        public String getColor() {
+        public Integer getColor() {
             return color;
         }
 
-        public void setColor(String color) {
+        public void setColor(Integer color) {
             this.color = color;
         }
 
-        public String getIsReady() {
+        public Boolean getIsReady() {
             return isReady;
         }
 
-        public void setIsReady(String isReady) {
+        public void setIsReady(Boolean isReady) {
             this.isReady = isReady;
         }
     }

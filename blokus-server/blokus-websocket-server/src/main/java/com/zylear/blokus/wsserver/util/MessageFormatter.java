@@ -12,6 +12,7 @@ import com.zylear.blokus.wsserver.constant.MsgType;
 import com.zylear.blokus.wsserver.enums.BlokusColor;
 import com.zylear.blokus.wsserver.enums.GameType;
 import com.zylear.blokus.wsserver.enums.RoomStatus;
+import com.zylear.blokus.wsserver.bean.transfer.StartBlokusMsg.PlayerInfoMsg;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,8 +41,8 @@ public class MessageFormatter {
             PlayerRoomInfo playerRoomInfo = entry.getValue();
             RoomPlayerInfoMsg roomPlayerInfoMsg = new RoomPlayerInfoMsg();
             roomPlayerInfoMsg.setAccount(playerRoomInfo.getAccount());
-            roomPlayerInfoMsg.setColor(getColorText(playerRoomInfo.getColor()));
-            roomPlayerInfoMsg.setIsReady(playerRoomInfo.getReady() ? "已准备" : "未准备");
+            roomPlayerInfoMsg.setColor(playerRoomInfo.getColor().getValue());
+            roomPlayerInfoMsg.setIsReady(playerRoomInfo.getReady());
             list.add(roomPlayerInfoMsg);
         }
         RoomPlayerListMsg roomPlayerListMsg = new RoomPlayerListMsg();
@@ -57,8 +58,17 @@ public class MessageFormatter {
         colorMsg.setColor(color.getValue());
         message.setContent(JsonUtil.toJSONString(colorMsg));
         return message;
-
     }
+
+    public static MessageBean formatColorMessage(Integer msgType, BlokusColor color) {
+        MessageBean message = new MessageBean();
+        message.setMsgType(msgType);
+        ColorMsg colorMsg = new ColorMsg();
+        colorMsg.setColor(color.getValue());
+        message.setContent(JsonUtil.toJSONString(colorMsg));
+        return message;
+    }
+
 
     public static MessageBean formatRoomListMessage(Collection<RoomInfo> roomList) {
         MessageBean message = new MessageBean();
@@ -103,7 +113,7 @@ public class MessageFormatter {
             PlayerRoomInfo playerRoomInfo = entry.getValue();
             RoomPlayerInfoMsg item = new RoomPlayerInfoMsg();
             item.setAccount(playerRoomInfo.getAccount());
-            item.setColor(getColorText(playerRoomInfo.getColor()));
+            item.setColor(playerRoomInfo.getColor().getValue());
             list.add(item);
         }
         roomPlayerListMsg.setPlayerInfoMsgList(list);
@@ -111,12 +121,22 @@ public class MessageFormatter {
         return message;
     }
 
-    public static MessageBean formatStartMsg(int msgType, BlokusColor color, GameType gameType) {
+    public static MessageBean formatStartMsg(int msgType, PlayerRoomInfo player,
+                                             Collection<PlayerRoomInfo> playerRoomInfos, GameType gameType) {
         MessageBean message = new MessageBean();
         message.setMsgType(msgType);
         StartBlokusMsg startBlokusMsg = new StartBlokusMsg();
-        startBlokusMsg.setColor(color.getValue());
+        startBlokusMsg.setColor(player.getColor().getValue());
+        startBlokusMsg.setAccount(player.getAccount());
         startBlokusMsg.setGameType(gameType.getValue());
+        List<PlayerInfoMsg> list = new ArrayList<>(playerRoomInfos.size());
+        for (PlayerRoomInfo playerRoomInfo : playerRoomInfos) {
+            PlayerInfoMsg playerInfoMsg = new PlayerInfoMsg();
+            playerInfoMsg.setAccount(playerRoomInfo.getAccount());
+            playerInfoMsg.setColor(playerRoomInfo.getColor().getValue());
+            list.add(playerInfoMsg);
+        }
+        startBlokusMsg.setPlayerList(list);
         message.setContent(JsonUtil.toJSONString(startBlokusMsg));
         return message;
     }
