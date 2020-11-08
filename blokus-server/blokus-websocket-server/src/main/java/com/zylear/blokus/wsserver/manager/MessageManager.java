@@ -56,6 +56,8 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     private static final Integer ESCAPE_CHANGE_SCORE_TEMPLATE = -25;
     private static final Integer SCORE_RANDOM_RANGE = 7; //excluded
 
+    private static final Integer TOTAL_STEP_COUNT = 2;
+
 
     @Override
     public void handle(TransferBean transferBean, List<TransferBean> responses) {
@@ -85,10 +87,10 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 chessDone(transferBean, responses);
                 break;
             case MsgType.GIVE_UP:
-                lose(transferBean, responses);
+                lose(MsgType.GIVE_UP, transferBean, responses);
                 break;
             case MsgType.LOSE:
-                lose(transferBean, responses);
+                lose(MsgType.LOSE, transferBean, responses);
                 break;
 //            case MsgType.WIN:
 //                win(transferBean, responses);
@@ -211,55 +213,64 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
 //    }
 
 
-    private synchronized void win(TransferBean transferBean, List<TransferBean> responses) {
-        PlayerRoomInfo playerRoomInfo = ServerCache.getPlayerRoomInfo(transferBean.getChannel());
-        RoomInfo roomInfo = ServerCache.getRoomInfo(transferBean.getChannel());
-        if (playerRoomInfo != null && roomInfo != null &&
-                RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
-                !GameStatus.win.equals(playerRoomInfo.getGameStatus())) {
-            logger.info("{} win", playerRoomInfo.getAccount());
-            self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.win);
-        }
-    }
+//    private synchronized void win(TransferBean transferBean, List<TransferBean> responses) {
+//        PlayerRoomInfo playerRoomInfo = ServerCache.getPlayerRoomInfo(transferBean.getChannel());
+//        RoomInfo roomInfo = ServerCache.getRoomInfo(transferBean.getChannel());
+//        if (playerRoomInfo != null && roomInfo != null &&
+//                RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
+//                !GameStatus.win.equals(playerRoomInfo.getGameStatus())) {
+//            logger.info("{} win", playerRoomInfo.getAccount());
+//            self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.win);
+//        }
+//    }
 
-    private synchronized void lose(TransferBean transferBean, List<TransferBean> responses) {
+    private synchronized void lose(Integer msgType, TransferBean transferBean, List<TransferBean> responses) {
         PlayerRoomInfo playerRoomInfo = ServerCache.getPlayerRoomInfo(transferBean.getChannel());
         RoomInfo roomInfo = ServerCache.getRoomInfo(transferBean.getChannel());
         if (playerRoomInfo != null && roomInfo != null &&
                 RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
                 GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
             logger.info("{} lose", playerRoomInfo.getAccount());
-            self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.lose);
+
+            Integer rank = self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.lose);
 
 
             List<Channel> players = ServerCache.getPlayerChannelsInRoom(transferBean.getChannel());
             for (Channel channel : players) {
-                responses.add(new TransferBean(channel, transferBean.getMessageBean()));
+                responses.add(new TransferBean(channel,
+                        MessageFormatter.formatGameResultMessage(msgType, playerRoomInfo.getColor(), rank)));
             }
 
-            PlayerRoomInfo winPlayer = roomInfo.canWin();
-            if (winPlayer != null) {
-                logger.info("{} win", winPlayer.getAccount());
-                self.gameStatusChange(winPlayer, roomInfo, GameResult.win);
-
-                for (Channel channel : players) {
-                    responses.add(new TransferBean(channel,
-                            MessageFormatter.formatColorMessage(MsgType.WIN, winPlayer.getColor())));
-                }
-            }
-
-            if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
-                notifyRoomList(transferBean, responses);
-            }
+            judgeLastAndNotify(transferBean, responses, roomInfo, players);
 
 
         }
     }
 
+    private void judgeLastAndNotify(TransferBean transferBean, List<TransferBean> responses, RoomInfo roomInfo, List<Channel> players) {
+        Integer rank;
+        PlayerRoomInfo winPlayer = roomInfo.canFinish();
+        if (winPlayer != null) {
+            logger.info("{} win", winPlayer.getAccount());
+            rank = self.gameStatusChange(winPlayer, roomInfo, GameResult.win);
+
+            for (Channel channel : players) {
+                responses.add(new TransferBean(channel,
+                        MessageFormatter.formatGameResultMessage(MsgType.WIN, winPlayer.getColor(), rank)));
+            }
+        }
+
+        if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
+            notifyRoomList(transferBean, responses);
+        }
+    }
+
 
     @Transactional(value = DataSourceBlokusGameConfig.TX_MANAGER)
-    public void gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult) {
+    public Integer gameStatusChange(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo, GameResult gameResult) {
 
+        //记录排名
+        int rank = roomInfo.generatePlayRank(gameResult);
         int changeScore;
         switch (gameResult) {
             case win:
@@ -269,6 +280,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                     changeScore = WIN_CHANGE_SCORE_TEMPLATE + RandomUtils.nextInt(0, SCORE_RANDOM_RANGE);
                 }
                 playerRoomInfo.setGameStatus(GameStatus.win);
+                roomInfo.setCurrentWinCount(roomInfo.getCurrentWinCount() + 1);
                 playerGameRecordService.update(playerRoomInfo.getAccount(), roomInfo.getGameType().getValue(), 1, 0, 0, changeScore);
                 break;
             case lose:
@@ -291,9 +303,10 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 playerGameRecordService.update(playerRoomInfo.getAccount(), roomInfo.getGameType().getValue(), 0, 0, 1, changeScore);
                 break;
             default:
-                return;
+                throw new RuntimeException();
         }
-        roomInfo.checkRoomStatus();
+        roomInfo.checkAndSwitchRoomStatus();
+        //检查之后再更新最终成绩  高性能异步
 
         PlayerGameLog playerGameLog = new PlayerGameLog();
         playerGameLog.setAccount(playerRoomInfo.getAccount());
@@ -301,9 +314,11 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
         playerGameLog.setGameResult(gameResult.getValue());
         playerGameLog.setStepsCount(playerRoomInfo.getStepsCount());
         playerGameLog.setChangeScore(changeScore);
+        playerGameLog.setRank(rank);
         playerGameLog.setCreateTime(new Date());
         playerGameLog.setLastUpdateTime(new Date());
         playerGameLogService.insert(playerGameLog);
+        return rank;
     }
 
 
@@ -321,7 +336,9 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
 
             @Override
             public void giveUp(PlayerRoomInfo playerRoomInfo, RoomInfo roomInfo) {
-                MessageBean messageBean = MessageFormatter.formatGiveUpMessage(playerRoomInfo.getColor());
+                Integer rank = self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.escape);
+                MessageBean messageBean = MessageFormatter
+                        .formatGameResultMessage(MsgType.GIVE_UP, playerRoomInfo.getColor(), rank);
                 for (Entry<String, PlayerRoomInfo> entry : roomInfo.getPlayers().entrySet()) {
                     if (!playerRoomInfo.getAccount().equals(entry.getKey())) {
                         responses.add(new TransferBean(entry.getValue().getChannel(), messageBean));
@@ -452,12 +469,37 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     private synchronized void chessDone(TransferBean transferBean, List<TransferBean> responses) {
 
         PlayerRoomInfo playerRoomInfo = ServerCache.getPlayerRoomInfo(transferBean.getChannel());
+
         if (playerRoomInfo != null) {
+
             playerRoomInfo.setStepsCount(playerRoomInfo.getStepsCount() + 1);
-            List<Channel> channels = ServerCache.getOtherPlayerChannelsInRoom(transferBean.getChannel());
-            for (Channel channel : channels) {
+
+            List<Channel> players = ServerCache.getOtherPlayerChannelsInRoom(transferBean.getChannel());
+            for (Channel channel : players) {
                 responses.add(new TransferBean(channel, transferBean.getMessageBean()));
             }
+
+
+
+            RoomInfo roomInfo = ServerCache.getRoomInfo(transferBean.getChannel());
+            if ( roomInfo != null &&
+                    RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
+                    GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
+
+                players = ServerCache.getPlayerChannelsInRoom(transferBean.getChannel());
+                if (playerRoomInfo.getStepsCount() >= TOTAL_STEP_COUNT) {
+                    Integer rank = self.gameStatusChange(playerRoomInfo, roomInfo, GameResult.win);
+                    for (Channel channel : players) {
+                        responses.add(new TransferBean(channel,
+                                MessageFormatter.formatGameResultMessage(MsgType.WIN, playerRoomInfo.getColor(), rank)));
+                    }
+
+                    judgeLastAndNotify(transferBean, responses, roomInfo, players);
+
+                }
+
+            }
+
         }
 
 

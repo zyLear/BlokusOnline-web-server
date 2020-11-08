@@ -1,11 +1,7 @@
 package com.zylear.blokus.wsserver.bean.gameinfo;
 
 
-
-import com.zylear.blokus.wsserver.enums.BlokusColor;
-import com.zylear.blokus.wsserver.enums.GameStatus;
-import com.zylear.blokus.wsserver.enums.GameType;
-import com.zylear.blokus.wsserver.enums.RoomStatus;
+import com.zylear.blokus.wsserver.enums.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +23,8 @@ public class RoomInfo {
     private Integer maxPlayerCount;
     private Map<String, PlayerRoomInfo> players = new HashMap<>(4);
     private Integer currentLoseCount = 0;
+    private Integer currentWinCount = 0;
+
 
     public String getRoomName() {
         return roomName;
@@ -93,6 +91,15 @@ public class RoomInfo {
         this.currentLoseCount = currentLoseCount;
     }
 
+
+    public Integer getCurrentWinCount() {
+        return currentWinCount;
+    }
+
+    public void setCurrentWinCount(Integer currentWinCount) {
+        this.currentWinCount = currentWinCount;
+    }
+
     public Boolean canStartGame() {
         int count = 0;
         for (Entry<String, PlayerRoomInfo> entry : players.entrySet()) {
@@ -120,6 +127,13 @@ public class RoomInfo {
                 '}';
     }
 
+
+    public void restart() {
+        roomStatus = RoomStatus.gaming;
+        currentWinCount = 0;
+        currentWinCount = 0;
+    }
+
     private String showPlayerRoomInfo() {
         StringBuilder stringBuilder = new StringBuilder("[");
         for (Entry<String, PlayerRoomInfo> entry : players.entrySet()) {
@@ -141,29 +155,31 @@ public class RoomInfo {
         return false;
     }
 
-    public void checkRoomStatus() {
-        for (Entry<String, PlayerRoomInfo> entry : players.entrySet()) {
-            if (GameStatus.gaming.equals(entry.getValue().getGameStatus())) {
-                return;
-            }
+    public void checkAndSwitchRoomStatus() {
+        if (currentWinCount + currentLoseCount == maxPlayerCount) {
+            roomStatus = RoomStatus.waiting;
         }
-        roomStatus = RoomStatus.waiting;
     }
 
-    public PlayerRoomInfo canWin() {
-        int loseCount = 0;
-        PlayerRoomInfo playerRoomInfo = null;
-        for (Entry<String, PlayerRoomInfo> entry : players.entrySet()) {
-            if (GameStatus.lose.equals(entry.getValue().getGameStatus())) {
-                loseCount++;
-            } else if (GameStatus.gaming.equals(entry.getValue().getGameStatus())) {
-                playerRoomInfo = entry.getValue();
+    public PlayerRoomInfo canFinish() {
+
+        if (currentWinCount + currentLoseCount == maxPlayerCount - 1) {
+            for (Entry<String, PlayerRoomInfo> entry : players.entrySet()) {
+                if (GameStatus.gaming.equals(entry.getValue().getGameStatus())) {
+                    return entry.getValue();
+                }
             }
         }
 
-        if (loseCount == maxPlayerCount - 1 ) {
-            return playerRoomInfo;
-        }
         return null;
+    }
+
+    public Integer generatePlayRank(GameResult result) {
+        if (GameResult.lose.equals(result) || GameResult.escape.equals(result)) {
+            return maxPlayerCount - currentLoseCount;
+        } else {
+            return 1 + currentWinCount;
+        }
+
     }
 }

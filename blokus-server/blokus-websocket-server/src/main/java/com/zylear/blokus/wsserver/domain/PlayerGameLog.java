@@ -15,6 +15,8 @@ public class PlayerGameLog {
 
     private Integer changeScore;
 
+    private Integer rank;
+
     private Date createTime;
 
     private Date lastUpdateTime;
@@ -81,5 +83,13 @@ public class PlayerGameLog {
 
     public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public Integer getRank() {
+        return rank;
+    }
+
+    public void setRank(Integer rank) {
+        this.rank = rank;
     }
 }

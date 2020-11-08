@@ -103,7 +103,6 @@ public class ServerCache {
                     if (RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
                             GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
                         serverCacheCallback.giveUp(playerRoomInfo, roomInfo);
-                        serverCacheCallback.gameStatusChange(playerRoomInfo, roomInfo, GameResult.escape);
                     } else if (RoomStatus.waiting.equals(roomInfo.getRoomStatus())) {
                         serverCacheCallback.updateRoomPlayersInfo(roomInfo.getRoomName());
                     }
@@ -176,7 +175,8 @@ public class ServerCache {
 //                        serverCacheCallback.startGame(roomInfo);
 //                        return;
                         if (roomInfo.canStartGame()) {
-                            roomInfo.setRoomStatus(RoomStatus.gaming);
+                            //重置本局相关信息
+                            roomInfo.restart();
                             for (Entry<String, PlayerRoomInfo> entry : roomInfo.getPlayers().entrySet()) {
                                 entry.getValue().setReady(false);
                                 entry.getValue().setStepsCount(0);

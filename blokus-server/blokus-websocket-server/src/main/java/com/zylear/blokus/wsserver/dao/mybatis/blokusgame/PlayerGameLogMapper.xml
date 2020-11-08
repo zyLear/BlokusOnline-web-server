@@ -8,11 +8,12 @@
         <result column="game_result" property="gameResult" jdbcType="TINYINT"/>
         <result column="steps_count" property="stepsCount" jdbcType="TINYINT"/>
         <result column="change_score" property="changeScore" jdbcType="TINYINT"/>
+        <result column="rank" property="rank" jdbcType="TINYINT"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id, account, game_log_id, game_result, steps_count, change_score, create_time, last_update_time
+        id, account, game_log_id, game_result, steps_count, change_score, create_time, last_update_time, rank
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         select
@@ -27,10 +28,10 @@
     <insert id="insert" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameLog">
         INSERT INTO t_player_game_log (id, account, game_log_id,
                                        game_result, steps_count, change_score,
-                                       create_time, last_update_time)
+                                       create_time, last_update_time,rank)
         VALUES (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{gameLogId,jdbcType=INTEGER},
                 #{gameResult,jdbcType=TINYINT}, #{stepsCount,jdbcType=TINYINT}, #{changeScore,jdbcType=TINYINT},
-                #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP})
+                #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP}, #{rank,jdbcType=TINYINT})
     </insert>
     <insert id="insertSelective" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameLog">
         insert into t_player_game_log

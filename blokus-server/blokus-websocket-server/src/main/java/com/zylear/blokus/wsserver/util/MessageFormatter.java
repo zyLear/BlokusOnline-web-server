@@ -60,6 +60,16 @@ public class MessageFormatter {
         return message;
     }
 
+    public static MessageBean formatGameResultMessage(Integer msgType, BlokusColor color, Integer rank) {
+        MessageBean message = new MessageBean();
+        message.setMsgType(msgType);
+        GameResultMsg msg = new GameResultMsg();
+        msg.setColor(color.getValue());
+        msg.setRank(rank);
+        message.setContent(JsonUtil.toJSONString(msg));
+        return message;
+    }
+
     public static MessageBean formatColorMessage(Integer msgType, BlokusColor color) {
         MessageBean message = new MessageBean();
         message.setMsgType(msgType);
