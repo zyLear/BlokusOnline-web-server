@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public class RoomInfo {
 
-    private Integer gameLogId;
+    private Long gameLogId;
     private String roomName;
     private RoomStatus roomStatus;
     private GameType gameType;
@@ -74,11 +74,11 @@ public class RoomInfo {
         this.players = players;
     }
 
-    public Integer getGameLogId() {
+    public Long getGameLogId() {
         return gameLogId;
     }
 
-    public void setGameLogId(Integer gameLogId) {
+    public void setGameLogId(Long gameLogId) {
         this.gameLogId = gameLogId;
     }
 

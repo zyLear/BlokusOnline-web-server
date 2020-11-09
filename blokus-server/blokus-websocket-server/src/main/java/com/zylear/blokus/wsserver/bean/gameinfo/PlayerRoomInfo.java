@@ -16,8 +16,6 @@ public class PlayerRoomInfo {
     private GameStatus gameStatus = GameStatus.unknown;
     private Integer stepsCount = 0;
 
-    private Integer rank;
-
 
     public String getAccount() {
         return account;

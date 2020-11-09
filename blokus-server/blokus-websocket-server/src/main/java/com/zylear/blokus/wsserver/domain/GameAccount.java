@@ -3,7 +3,7 @@ package com.zylear.blokus.wsserver.domain;
 import java.util.Date;
 
 public class GameAccount {
-    private Integer id;
+    private Long id;
 
     private String account;
 
@@ -17,11 +17,11 @@ public class GameAccount {
 
     private Date lastUpdateTime;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

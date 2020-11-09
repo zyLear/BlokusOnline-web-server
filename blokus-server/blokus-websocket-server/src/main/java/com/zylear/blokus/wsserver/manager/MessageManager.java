@@ -58,12 +58,15 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
 
     private static final Integer TOTAL_STEP_COUNT = 2;
 
+    private static final String GUEST_PREFIX = "[guest]";
+
 
     @Override
     public void handle(TransferBean transferBean, List<TransferBean> responses) {
         MessageBean messageBean = transferBean.getMessageBean();
-        if (messageBean.getMsgType() != MsgType.PING && messageBean.getMsgType() != MsgType.ROOM_LIST)
+        if (messageBean.getMsgType() != MsgType.PING && messageBean.getMsgType() != MsgType.ROOM_LIST) {
             logger.info("handle msg :" + messageBean);
+        }
         switch (messageBean.getMsgType()) {
             case MsgType.LOGIN:
                 login(transferBean, responses);
@@ -109,6 +112,10 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                 initPlayerInfoInGame(transferBean, responses);
                 break;
 
+            case MsgType.GUEST_LOGIN:
+                guestLogin(transferBean, responses);
+                break;
+
 
             case MsgType.QUIT:
                 quit(transferBean, responses);
@@ -116,6 +123,41 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             default:
                 break;
         }
+    }
+
+    private void guestLogin(TransferBean transferBean, List<TransferBean> responses) {
+
+        MessageBean message = transferBean.getMessageBean();
+        UserMsg userMsg;
+        try {
+            userMsg = JsonUtil.getObjectFromJson(message.getContent(), UserMsg.class);
+            logger.info("guest login. account:{}", userMsg.getAccount());
+            logger.info("guset login. password:{}", userMsg.getPassword());
+        } catch (Exception e) {
+            logger.warn("parse UserMsg exception. ", e);
+            transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
+            responses.add(transferBean);
+            return;
+        }
+
+        if (StringUtils.isEmpty(userMsg.getAccount())) {
+            transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
+            responses.add(transferBean);
+            return;
+        }
+
+        String account = GUEST_PREFIX + userMsg.getAccount();
+        GameAccount gameAccount =
+                gameAccountService.findByAccount(account);
+        if (gameAccount == null &&
+                ServerCache.login(transferBean.getChannel(), account)) {
+            transferBean.setMessageBean(MessageFormatter.formatSuccessMsg(MsgType.LOGIN_RESPONSE, account));
+            responses.add(transferBean);
+        } else {
+            transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
+            responses.add(transferBean);
+        }
+
     }
 
 
@@ -370,22 +412,14 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             return;
 
         }
-        transferBean.setMessageBean(MessageBean.LOGIN_SUCCESS);
         GameAccount gameAccount =
                 gameAccountService.findByAccountAndPassowrd(userMsg.getAccount(), userMsg.getPassword());
         if (gameAccount != null && ServerCache.login(transferBean.getChannel(), userMsg.getAccount())) {
+            transferBean.setMessageBean(MessageFormatter.formatSuccessMsg(MsgType.LOGIN_RESPONSE, userMsg.getAccount()));
             responses.add(transferBean);
         } else {
             transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
             responses.add(transferBean);
-            return;
-        }
-
-        if (!StringUtils.isEmpty(userMsg.getAccount())) {
-            if (ServerCache.login(transferBean.getChannel(), userMsg.getAccount())) {
-                responses.add(transferBean);
-                return;
-            }
         }
 
     }
@@ -480,9 +514,8 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             }
 
 
-
             RoomInfo roomInfo = ServerCache.getRoomInfo(transferBean.getChannel());
-            if ( roomInfo != null &&
+            if (roomInfo != null &&
                     RoomStatus.gaming.equals(roomInfo.getRoomStatus()) &&
                     GameStatus.gaming.equals(playerRoomInfo.getGameStatus())) {
 
@@ -495,13 +528,9 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
                     }
 
                     judgeLastAndNotify(transferBean, responses, roomInfo, players);
-
                 }
-
             }
-
         }
-
 
 //        return null;
     }
@@ -513,6 +542,9 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             roomInfoMsg = JsonUtil.getObjectFromJson(message.getContent(), RoomInfoMsg.class);
             logger.info("create room. roomName:{}", roomInfoMsg.getRoomName());
             logger.info("create room. gameType:{}", GameType.valueOf(roomInfoMsg.getGameType()));
+            if (StringUtils.isEmpty(roomInfoMsg.getRoomName())) {
+                throw new RuntimeException("room name is empty");
+            }
         } catch (Exception e) {
             logger.warn("parse BLOKUSCreateRoom exception. ", e);
             transferBean.setMessageBean(MessageBean.CREATE_ROOM_FAIL);

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zylear.blokus.wsserver.dao.mybatis.blokusgame.PlayerGameRecordMapper">
     <resultMap id="BaseResultMap" type="com.zylear.blokus.wsserver.domain.PlayerGameRecord">
-        <id column="id" property="id" jdbcType="INTEGER"/>
+        <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="account" property="account" jdbcType="VARCHAR"/>
         <result column="game_type" property="gameType" jdbcType="TINYINT"/>
         <result column="win_count" property="winCount" jdbcType="INTEGER"/>
@@ -21,18 +21,18 @@
         select
         <include refid="Base_Column_List"/>
         from t_player_game_record
-        where id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=BIGINT}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         DELETE FROM t_player_game_record
-        WHERE id = #{id,jdbcType=INTEGER}
+        WHERE id = #{id,jdbcType=BIGINT}
     </delete>
     <insert id="insert" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameRecord">
         INSERT INTO t_player_game_record (id, account, game_type,
                                           win_count, lose_count, escape_count,
                                           rank_score, rank, create_time,
                                           last_update_time)
-        VALUES (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{gameType,jdbcType=TINYINT},
+        VALUES (#{id,jdbcType=BIGINT}, #{account,jdbcType=VARCHAR}, #{gameType,jdbcType=TINYINT},
                 #{winCount,jdbcType=INTEGER}, #{loseCount,jdbcType=INTEGER}, #{escapeCount,jdbcType=INTEGER},
                 #{rankScore,jdbcType=INTEGER}, #{rank,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP},
                 #{lastUpdateTime,jdbcType=TIMESTAMP})
@@ -73,7 +73,7 @@
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
-                #{id,jdbcType=INTEGER},
+                #{id,jdbcType=BIGINT},
             </if>
             <if test="account != null">
                 #{account,jdbcType=VARCHAR},
@@ -135,7 +135,7 @@
                 last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
             </if>
         </set>
-        where id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameRecord">
         UPDATE t_player_game_record
@@ -148,7 +148,7 @@
             rank             = #{rank,jdbcType=TINYINT},
             create_time      = #{createTime,jdbcType=TIMESTAMP},
             last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP}
-        WHERE id = #{id,jdbcType=INTEGER}
+        WHERE id = #{id,jdbcType=BIGINT}
     </update>
 
 

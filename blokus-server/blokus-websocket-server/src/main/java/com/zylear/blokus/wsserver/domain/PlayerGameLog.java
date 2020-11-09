@@ -3,11 +3,11 @@ package com.zylear.blokus.wsserver.domain;
 import java.util.Date;
 
 public class PlayerGameLog {
-    private Integer id;
+    private Long id;
 
     private String account;
 
-    private Integer gameLogId;
+    private Long gameLogId;
 
     private Integer gameResult;
 
@@ -21,11 +21,11 @@ public class PlayerGameLog {
 
     private Date lastUpdateTime;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -37,11 +37,11 @@ public class PlayerGameLog {
         this.account = account;
     }
 
-    public Integer getGameLogId() {
+    public Long getGameLogId() {
         return gameLogId;
     }
 
-    public void setGameLogId(Integer gameLogId) {
+    public void setGameLogId(Long gameLogId) {
         this.gameLogId = gameLogId;
     }
 

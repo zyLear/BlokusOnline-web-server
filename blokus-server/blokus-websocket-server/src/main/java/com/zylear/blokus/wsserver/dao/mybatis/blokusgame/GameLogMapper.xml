@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zylear.blokus.wsserver.dao.mybatis.blokusgame.GameLogMapper">
     <resultMap id="BaseResultMap" type="com.zylear.blokus.wsserver.domain.GameLog">
-        <id column="id" property="id" jdbcType="INTEGER"/>
+        <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="room_name" property="roomName" jdbcType="VARCHAR"/>
         <result column="game_type" property="gameType" jdbcType="TINYINT"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
@@ -15,17 +15,17 @@
         select
         <include refid="Base_Column_List"/>
         from t_game_log
-        where id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=BIGINT}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from t_game_log
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
   </delete>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.zylear.blokus.wsserver.domain.GameLog">
     insert into t_game_log (id, room_name, game_type, 
       create_time, last_update_time)
-    values (#{id,jdbcType=INTEGER}, #{roomName,jdbcType=VARCHAR}, #{gameType,jdbcType=TINYINT},
+    values (#{id,jdbcType=BIGINT}, #{roomName,jdbcType=VARCHAR}, #{gameType,jdbcType=TINYINT},
       #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP})
   </insert>
 
@@ -50,7 +50,7 @@
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
-                #{id,jdbcType=INTEGER},
+                #{id,jdbcType=BIGINT},
             </if>
             <if test="roomName != null">
                 #{roomName,jdbcType=VARCHAR},
@@ -82,7 +82,7 @@
                 last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
             </if>
         </set>
-        where id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.zylear.blokus.wsserver.domain.GameLog">
     update t_game_log
@@ -90,6 +90,6 @@
       game_type = #{gameType,jdbcType=TINYINT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

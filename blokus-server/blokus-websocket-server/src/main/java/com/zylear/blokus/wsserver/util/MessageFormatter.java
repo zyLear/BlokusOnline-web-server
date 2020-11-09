@@ -169,4 +169,14 @@ public class MessageFormatter {
     }
 
 
+    public static MessageBean formatSuccessMsg(Integer msgType, String msg) {
+        MessageBean message = new MessageBean();
+        message.setMsgType(msgType);
+        ResponseMsg responseMsg = new ResponseMsg();
+        responseMsg.setCode(ResponseMsg.SUCC);
+        responseMsg.setMessage(msg);
+        message.setContent(JsonUtil.toJSONString(responseMsg));
+        return message;
+
+    }
 }

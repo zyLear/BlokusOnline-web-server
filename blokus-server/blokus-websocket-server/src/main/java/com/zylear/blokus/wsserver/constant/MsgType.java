@@ -61,6 +61,9 @@ public class MsgType {
 
     public static final int REGISTER_RESPONSE = 28;
 
+    public static final int GUEST_LOGIN = 29;
+
+
 
     public static final int PING = 10000;
 

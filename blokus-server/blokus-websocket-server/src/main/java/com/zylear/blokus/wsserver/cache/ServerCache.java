@@ -7,6 +7,7 @@ import com.zylear.blokus.wsserver.enums.*;
 import com.zylear.blokus.wsserver.manager.callback.EmptyServerCacheCallback;
 import com.zylear.blokus.wsserver.manager.callback.ServerCacheCallback;
 import io.netty.channel.Channel;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -72,6 +73,10 @@ public class ServerCache {
     }
 
     public static boolean login(Channel channel, String account) {
+
+        if (StringUtils.isEmpty(account)) {
+            return false;
+        }
 
         if (!isContainsAccount(account)) {
             PlayerInfo player = new PlayerInfo();

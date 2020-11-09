@@ -4,8 +4,10 @@ package com.zylear.blokus.wsserver.bean.transfer.base;
  * Created by xiezongyu on 2018/7/27.
  */
 public class ResponseMsg {
-    private Integer errorCode;
-    private String errorMsg;
+    private Integer code;
+    private String message;
+
+    public static final Integer SUCC = 0;
 
     public static final ResponseMsg SUCCESS = new ResponseMsg(0, "success");
 
@@ -13,31 +15,31 @@ public class ResponseMsg {
 
 
     public ResponseMsg(ResponseMsg responseMsg) {
-        this.errorCode = responseMsg.errorCode;
-        this.errorMsg = responseMsg.errorMsg;
+        this.code = responseMsg.code;
+        this.message = responseMsg.message;
     }
 
     public ResponseMsg() {
     }
 
-    public ResponseMsg(Integer errorCode, String errorMsg) {
-        this.errorCode = errorCode;
-        this.errorMsg = errorMsg;
+    public ResponseMsg(Integer code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
-    public Integer getErrorCode() {
-        return errorCode;
+    public Integer getCode() {
+        return code;
     }
 
-    public void setErrorCode(Integer errorCode) {
-        this.errorCode = errorCode;
+    public void setCode(Integer code) {
+        this.code = code;
     }
 
-    public String getErrorMsg() {
-        return errorMsg;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
