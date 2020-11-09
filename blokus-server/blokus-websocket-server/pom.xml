@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>blokus-websocket-server</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>blokus-websocket-server</name>
 
     <dependencies>
@@ -106,6 +106,9 @@
 
 
     <build>
+
+
+        <finalName>blokus-server</finalName>
 
         <plugins>
 

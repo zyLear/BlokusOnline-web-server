@@ -30,7 +30,7 @@
     <insert id="insert" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameRecord">
         INSERT INTO t_player_game_record (id, account, game_type,
                                           win_count, lose_count, escape_count,
-                                          rank_score, rank, create_time,
+                                          rank_score, `rank`, create_time,
                                           last_update_time)
         VALUES (#{id,jdbcType=BIGINT}, #{account,jdbcType=VARCHAR}, #{gameType,jdbcType=TINYINT},
                 #{winCount,jdbcType=INTEGER}, #{loseCount,jdbcType=INTEGER}, #{escapeCount,jdbcType=INTEGER},

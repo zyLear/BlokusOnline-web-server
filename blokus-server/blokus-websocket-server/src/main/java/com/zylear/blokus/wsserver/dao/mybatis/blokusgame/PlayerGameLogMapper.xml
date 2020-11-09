@@ -27,11 +27,11 @@
     </delete>
     <insert id="insert" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameLog">
         INSERT INTO t_player_game_log (id, account, game_log_id,
-                                       game_result, steps_count, change_score,
-                                       create_time, last_update_time,rank)
-        VALUES (#{id,jdbcType=BIGINT}, #{account,jdbcType=VARCHAR}, #{gameLogId,jdbcType=INTEGER},
-                #{gameResult,jdbcType=TINYINT}, #{stepsCount,jdbcType=TINYINT}, #{changeScore,jdbcType=TINYINT},
-                #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP}, #{rank,jdbcType=TINYINT})
+                                       game_result, steps_count, change_score, `rank`,
+                                       create_time, last_update_time)
+        VALUES (#{id,jdbcType=BIGINT}, #{account,jdbcType=VARCHAR}, #{gameLogId,jdbcType=BIGINT},
+                #{gameResult,jdbcType=TINYINT}, #{stepsCount,jdbcType=TINYINT}, #{changeScore,jdbcType=TINYINT},#{rank,jdbcType=TINYINT},
+                #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP})
     </insert>
     <insert id="insertSelective" parameterType="com.zylear.blokus.wsserver.domain.PlayerGameLog">
         insert into t_player_game_log

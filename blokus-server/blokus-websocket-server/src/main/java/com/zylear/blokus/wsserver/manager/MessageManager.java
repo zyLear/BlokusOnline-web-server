@@ -56,7 +56,7 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
     private static final Integer ESCAPE_CHANGE_SCORE_TEMPLATE = -25;
     private static final Integer SCORE_RANDOM_RANGE = 7; //excluded
 
-    private static final Integer TOTAL_STEP_COUNT = 2;
+    private static final Integer TOTAL_STEP_COUNT = 21;
 
     private static final String GUEST_PREFIX = "[guest]";
 
@@ -141,6 +141,12 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
         }
 
         if (StringUtils.isEmpty(userMsg.getAccount())) {
+            transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
+            responses.add(transferBean);
+            return;
+        }
+
+        if (!userMsg.getAccount().matches("[a-zA-Z0-9]{3,16}")) {
             transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
             responses.add(transferBean);
             return;
@@ -412,6 +418,19 @@ public class MessageManager implements MessageHandler<TransferBean, List<Transfe
             return;
 
         }
+
+        if (StringUtils.isEmpty(userMsg.getAccount())) {
+            transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
+            responses.add(transferBean);
+            return;
+        }
+
+        if (!userMsg.getAccount().matches("[a-zA-Z0-9]{3,16}")) {
+            transferBean.setMessageBean(MessageBean.LOGIN_FAIL);
+            responses.add(transferBean);
+            return;
+        }
+
         GameAccount gameAccount =
                 gameAccountService.findByAccountAndPassowrd(userMsg.getAccount(), userMsg.getPassword());
         if (gameAccount != null && ServerCache.login(transferBean.getChannel(), userMsg.getAccount())) {
