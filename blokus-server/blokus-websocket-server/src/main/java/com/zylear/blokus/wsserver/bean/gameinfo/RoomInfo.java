@@ -131,7 +131,7 @@ public class RoomInfo {
     public void restart() {
         roomStatus = RoomStatus.gaming;
         currentWinCount = 0;
-        currentWinCount = 0;
+        currentLoseCount = 0;
     }
 
     private String showPlayerRoomInfo() {
