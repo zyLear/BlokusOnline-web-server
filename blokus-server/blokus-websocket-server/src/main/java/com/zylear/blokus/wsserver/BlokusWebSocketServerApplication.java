@@ -11,6 +11,8 @@ import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.util.Properties;
+
 @SpringBootApplication
 //@EnableAutoConfiguration
 @ComponentScan("com.zylear.blokus.wsserver.*")
@@ -26,6 +28,8 @@ import org.springframework.context.annotation.ComponentScan;
 public class BlokusWebSocketServerApplication {
 
 	public static void main(String[] args) {
+		Properties properties = System.getProperties();
+		System.out.println(properties);
 		SpringApplication.run(BlokusWebSocketServerApplication.class, args);
 	}
 
