@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+<!--    <SpringProperty name="logDir" source="log.path"/>-->
+<!--    <SpringProperty name="logAppender" source="log.appender"/>-->
+    <property scope="context" name="blokusServerLogFile" value="blokus-server.log"/>
+
+    <property scope="context" name="logDir" value="/home/logs/"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{5} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+	<appender name="blokusServerLogAppender"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Prudent>true</Prudent> 
+        <file>${blokusServerLogFile}</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{5} - %msg%n</Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${logDir}/%d{yyyyMMdd}/${blokusServerLogFile}
+            </fileNamePattern>
+
+            <!-- keep 30 days' worth of history capped at 3GB total size -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+
+            <!-- <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>20MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy> -->
+        </rollingPolicy>
+    </appender>
+
+
+<!--    <logger name="blokusServerLog" level="INFO" additivity="false">-->
+<!--        <appender-ref ref="blokusServerLogAppender"/>-->
+<!--    </logger>-->
+
+    <root level="INFO" >
+        <appender-ref ref="blokusServerLogAppender" />
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
